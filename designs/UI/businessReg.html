@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.css">
+    <title>WeConnect - Business Registration</title>
+</head>
+<body>
+  <!-- Bootstrap Navbar -->
+  <header class="site-header">
+    <nav class="navbar navbar-expand-md navbar-light bg-light">
+      <div class="container">
+        <a class="navbar-brand" href="#">WeConnect</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="home.html">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">About</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Register Business</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="businesssprofile.html">Business Profile</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="user.html">User Account</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="listing.html">Logout</a>
+                </li>
+            </ul>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 bg-light p-4 rounded">
+            <h2 class="text-center mb-4">Business Registration</h2>
+            <form>
+                <!-- Business Name Input -->
+                <div class="form-group">
+                    <label for="inputBusinessName">Business Name</label>
+                    <input type="text" class="form-control" id="inputBusinessName" placeholder="Enter your business name">
+                </div>
+
+                <!-- Business Contact Input -->
+                <div class="form-group">
+                    <label for="inputBusinessContact">Business Contact</label>
+                    <input type="text" class="form-control" id="inputBusinessContact" placeholder="Enter business contact information">
+                </div>
+
+                <!-- Location Input -->
+                <div class="form-group">
+                    <label for="selectLocation">Select Location (Province)</label>
+                    <select class="form-control" id="selectLocation">
+                        <option value="" disabled selected>Select location</option>
+                        <option value="nairobi">Nairobi</option>
+                        <option value="coast">Coast</option>
+                        <option value="central">Central</option>
+                        <option value="rift_valley">Rift Valley</option>
+                        <option value="eastern">Eastern</option>
+                        <option value="western">Western</option>
+                        <option value="nyanza">Nyanza</option>
+                        <option value="north_eastern">North Eastern</option>
+                    </select>
+                </div>
+
+                <!-- Business Category Dropdown -->
+                <div class="form-group">
+                    <label for="selectBusinessCategory">Select Business Category</label>
+                    <select class="form-control" id="selectBusinessCategory">
+                        <option value="" disabled selected>Select a category</option>
+                        <option value="agriculture and agribusiness">Agriculture</option>
+                        <option value="construction">Construction</option>
+                        <option value="technology">Technology</option>
+                        <option value="mining and extraction">Mining and Extraction</option>
+                        <option value="manufacturing">Manufacturing</option>
+                        <option value="energy">Technology</option>
+                        <option value="technology and IT">Technology and IT</option>
+                        <option value="hospitality and tourism">Hospitality and Tourism</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="financial services">Financial Services</option>
+                        <option value="real etate">Real Etate</option>
+                        <option value="transport and logistics">Transport and Logistics</option>
+                        <option value="telecomunication">Telecomunication</option>
+                        <option value="entertainment and media">Entertainment and Media</option>
+                        <option value="education">Education</option>
+                        <option value="professional servives">Professional Servives</option>
+                        <option value="environmental servives">Environmental Servives</option>
+                        <option value="government and public administration">Government and Public Administration</option>
+                        <option value="non profit and social servives">Non Profit and Social Servives</option>
+                    </select>
+                </div>
+
+                <!-- Business Description Text Area -->
+                <div class="form-group">
+                    <label for="textareaBusinessDescription">Business Description (max 300 characters)</label>
+                    <textarea class="form-control" id="textareaBusinessDescription" rows="3" maxlength="300" placeholder="Provide a brief description of your business"></textarea>
+                </div>
+
+                <!-- Business Registration Button with Background Color -->
+                <button type="submit" class="btn btn-primary btn-block">Register Business</button>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
+</body>
+</html>
+
