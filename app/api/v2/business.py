@@ -7,7 +7,7 @@ import os
 from utils.json_schema import new_business, business_update, login_required
 from utils.validations import search
 from app.models.v2 import Business
-from app import create_app, db
+from app.extensions import db
 
 
 business = Blueprint('business', __name__, url_prefix="/api/v2")

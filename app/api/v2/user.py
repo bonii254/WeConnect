@@ -13,16 +13,12 @@ from flask_mail import Message
 from utils.json_schema import (reg_user_schema, login_schema, reset_pass,
                                update_user_schema, login_required, forgot_pass)
 from app.models.v2 import User
-from app import create_app, db, mail
+from app.extensions import db, mail
 from cerberus import Validator
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-auth = Blueprint('auth', url_prefix="/api/v2")
-
-
-app = create_app(os.getenv('APP_SETINGS'))
-app.app_context().push()
+auth = Blueprint('auth', __name__, url_prefix="/api/v2")
 
 
 @auth.route('/auth/register', methods=['POST'], strict_slashes=False)
@@ -78,7 +74,7 @@ def login():
 
 
 @auth.route('/auth/logout', methods=['POST'], strict_slashes=False)
-@login_recquired
+@login_required
 def logout(current_user):
     """logout a user"""
     current_user.logged_in = False
@@ -160,8 +156,8 @@ def forgot_password():
         try:
             mail.send(msg)
             return jsonify(
-                {"Success": "Password reset initiated.
-                 Check your email for further instructions."})
+                {"Success": "Password reset initiated."
+                 "Check your email for further instructions."})
         except Exception as e:
             return jsonify({"Error": f"Failed to send email: {str(e)}"}), 500
     else:
