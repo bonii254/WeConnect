@@ -2,6 +2,7 @@
 """validation schemas for POST and PUT json data"""
 
 
+import logging
 import datetime
 import jwt
 import os
@@ -13,6 +14,7 @@ from utils.validations import (validate_field, validate_email, username_taken,
                                 validate_password, forgot_password,)
 
 
+logging.basicConfig(level=logging.INFO, filename='app.log')
 reg_user_schema = {
     "username": {
         "type": "string",
@@ -177,7 +179,9 @@ def login_required(original_function):
             }), 401
         try:
             token = request.headers['access-token']
-            data = jwt.decode(token, os.getenv("SECRET_KEY"))
+            logging.info(f"Received token: {token}")
+            data = jwt.decode(token, os.getenv("SECRET_KEY"), algorithms=['HS256'])
+            logging.info(f"Decoded data: {data}")
             current_user = User.query.filter_by(
                 username=data['username'],
                 logged_in=True
@@ -185,6 +189,7 @@ def login_required(original_function):
             if not current_user:
                 return jsonify({"message": "You are not logged in"}), 401
         except Exception as e:
+            logging.error(f"Error during token verification: {str(e)}")
             return jsonify({'message': 'Token is invalid or Expired!'}), 401
         return original_function(current_user, *args, **kwargs)
     return decorated

@@ -13,9 +13,8 @@ from flask_mail import Message
 from utils.json_schema import (reg_user_schema, login_schema, reset_pass,
                                update_user_schema, login_required, forgot_pass)
 from app.models.v2 import User
-from app.extensions import db, mail
+from app.extensions import db, mail, bcrypt
 from cerberus import Validator
-from werkzeug.security import generate_password_hash, check_password_hash
 
 
 auth = Blueprint('auth', __name__, url_prefix="/api/v2")
@@ -31,8 +30,8 @@ def create_user():
     if errors:
         return jsonify({"Errors": errors}), 401
     user_info['username'] = user_info['username'].strip().lower()
-    user_info['password'] = generate_password_hash(
-        user_info['password'], method='sha256')
+    user_info['password'] = bcrypt.generate_password_hash(
+        user_info['password']).decode('utf-8')
     new_user = User(**user_info)
     db.session.add(new_user)
     db.session.commit()
@@ -55,18 +54,22 @@ def login():
             return jsonify({"Errors": errors}), 401
         username = login_info['username'].strip().lower()
         user = User.query.filter_by(username=username).first()
-        if check_password_hash(user.password, login_info['password']):
-            user_data = {
+        if not user:
+            return jsonify({"message": "username not found"}), 404
+        if bcrypt.check_password_hash(user.password, login_info['password']):
+            payload = {
                 "username": user.username, "email": user.email,
                 "first_name": user.first_name, "last_name": user.last_name,
-                "image": user.image}
-            token = jwt.encode({
-                "username": user.username, "user": user_data,
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(
-                    minutes=60)}, os.getenv("SECRET_KEY"))
+                "image": user.image, 
+                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}
+            token = jwt.encode(
+                payload, os.getenv("SECRET_KEY"), algorithm='HS256')
             user.logged_in = True
             db.session.commit()
-            return jsonify({"auth_toke": token.decode("UTF-8")}), 200
+            return jsonify({
+                "message": "Login successful!",
+                "auth_token": token
+                }), 200
         return jsonify({"message": "incorrect password"}), 401
     except Exception:
         return jsonify({
@@ -92,8 +95,8 @@ def reset_password(current_user):
     errors = validator.errors
     if errors:
         return jsonify({"Errors": errors}), 401
-    if check_hashed_password(current_user.password, data['old_password']):
-        hashed_password = generate_hashed_password(
+    if bcrypt.check_hashed_password(current_user.password, data['old_password']):
+        hashed_password = bcrypt.generate_hashed_password(
             data['password'], method='sha256')
         current_user.password = hashed_password
         db.session.commit()
@@ -142,7 +145,7 @@ def forgot_password():
     if user:
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for _ in range(8))
-        user.password = generate_password_hash(password, method='sha256')
+        user.password = bcrypt.generate_password_hash(password, method='sha256')
         db.session.commit()
         msg = Message(
             subject="Password Reset Request",
