@@ -1,9 +1,12 @@
+#!/usr/bin/env python3
+
+
 from flask import Flask, Blueprint, make_response, render_template, jsonify
 import os
 from instance.config import app_config
 from flask_migrate import Migrate
 from flask_cors import CORS
-from .extensions import db, mail
+from .extensions import db, mail, bcrypt, make_celery
 from app.api.v2.business import business
 from app.api.v2.review import review
 from app.api.v2.user import auth
@@ -23,10 +26,20 @@ def create_app(config_name):
     app.register_blueprint(business)
     app.register_blueprint(review)
     app.register_blueprint(auth)
+    app.config["CELERY_CONFIG"] = {
+        "broker_url": "redis://localhost:6379/0", 
+        "result_backend": "redis://localhost:6379/0"
+     }
+
     migrate = Migrate(app, db)
     db.init_app(app)
     mail.init_app(app)
-    return app
+    bcrypt.init_app(app)
+    
+    celery = make_celery(app)
+    celery.set_default()
+    
+    return app, celery
 
 
 import app.models.v2
