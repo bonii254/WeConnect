@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """hold class TimestampMixin, User, Business and Review which create which 
 create table for storing user, business and review data. all classes inherite 
 from TimestampMixin to hold date when object created and updated."""
