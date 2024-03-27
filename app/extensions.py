@@ -5,11 +5,13 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
 from celery import Celery
 
 db = SQLAlchemy()
 mail = Mail()
 bcrypt = Bcrypt()
+migrate = Migrate()
 
 
 def make_celery(app):
