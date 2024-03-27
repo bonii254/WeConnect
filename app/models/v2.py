@@ -61,6 +61,6 @@ class Review(TimestampMixin, db.Model):
     __tablename__ = 'reviews'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(128))
-    body = db.Column(db.String(255))
+    review = db.Column(db.String(255))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     business_id = db.Column(db.Integer, db.ForeignKey('businesses.id'))
