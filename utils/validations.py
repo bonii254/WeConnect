@@ -24,7 +24,7 @@ def validate_field(field, value, error):
 
 def validate_email(field, value, error):
     """validate if email is not taken and is in correct format"""
-    if user.query.filter_by(email=value).first():
+    if User.query.filter_by(email=value).first():
         error(field, "Email taken")
     if not re.match(
             r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]{2,4}$', value):
@@ -32,7 +32,7 @@ def validate_email(field, value, error):
 
 
 def username_taken(field, value, error):
-    """validate no duplicate username"""
+    """validate if the username is already taken"""
     username = value.strip().lower()
     if not username:
         error(field, "Field cannot be empty")
@@ -69,7 +69,7 @@ def search(filters):
     name = filters["name"]
     location = filters["location"]
     page = filters["page"]
-    limit = filters['limit']
+    per_page = filters['limit']
     query = []
     if name:
         query.append(Business.name.ilike("%" + name + "%"))
@@ -77,6 +77,6 @@ def search(filters):
         query.append(Business.category.ilike("%" + category + "%"))
     if location:
         query.append(Business.location.ilike("%" + location + "%"))
-    businesses = Business.query.filter(*query).paginate(page, limit, True)
+    businesses = Business.query.filter(*query).paginate(page = page, per_page = per_page, error_out = False)
 
     return businesses
