@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 """busines api endpoints"""
-
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, url_for
 from cerberus import Validator
 import os
 from utils.json_schema import new_business, business_update, login_required
@@ -18,21 +17,28 @@ business = Blueprint('business', __name__, url_prefix="/api/v2")
 def register_business(current_user):
     """create a new business"""
     bus_info = request.get_json()
-    validator = Validator(new_busines)
+    validator = Validator(new_business)
     validator.validate(bus_info)
     errors = validator.errors
     if errors:
         return jsonify({"Errors": errors})
     bus_info['name'] = bus_info['name'].strip().lower()
     bus_info['user_id'] = current_user.id
-    new_bus = Business(**bus_info)
+    new_bus = Business(
+        name=bus_info['name'],
+        user_id=bus_info['user_id'],
+        location=bus_info['location'],
+        category=bus_info['category'],
+        description=bus_info['description']
+    )
     db.session.add(new_bus)
     db.session.commit()
     return jsonify({
         "message": "Business created", "business":
         {
-            "name": new_bus.name, "description": new_bus.description,
-            "category": new_bus.category, "location": new_bus.location
+            "name": new_bus.name, "business_id": new_bus.id,
+            "description": new_bus.description, "category": new_bus.category,
+            "location": new_bus.location, "owner": current_user.username,
         }}), 201
 
 
@@ -55,50 +61,70 @@ def get_business(business_id):
 @business.route('/businesses/user', methods=['GET'], strict_slashes=False)
 @login_required
 def get_user_businesses(current_user):
-    """get list of all user businesses"""
+    """get list of all current_user businesses"""
     page = request.args.get("page", 1, type=int)
-    limit = request.args.get("limit", 10, type=int)
+    per_page = request.args.get("per_page", 3, type=int)
     results = Business.query.filter_by(user_id=current_user.id).paginate(
-        page, limit, True)
-    all = results.items
-    return jsonify({
-        "results": [{
+        page=page, per_page=per_page, error_out=False)
+
+    businesses_data = [{
             "id": business.id, "user_id": business.user.id,
             "name": business.name, "location": business.location,
             "category": business.category, "description": business.description,
             "created_at": business.created_at,
             "updated_at": business.updated_at,
-        } for business in all],
-        "per_page": results.per_page, "page": results.page,
-        "total_pages": results.pages, "total_results": results.total
+        } for business in results.items]
+
+    next_page = url_for(
+        'business.get_user_businesses', page=results.next_num) \
+        if results.has_next else None
+    prev_page = url_for(
+        'business.get_user_businesses', page=results.prev_num) \
+        if results.has_prev else None
+    return jsonify({
+        "results": businesses_data,
+        "per_page": results.per_page,
+        "page": results.page,
+        "total_pages": results.pages,
+        "total_results": results.total,
+        "next_page": next_page,
+        "prev_page": prev_page
     })
 
 
 @business.route('/businesses', methods=['GET'], strict_slashes=False)
 def get_all_businesses():
     """return all registered businesses"""
-    search_params = {
-        'page': request.args.get('page', 1, type=int),
-        'name': request.args.get('q', None, type=str),
-        'location': request.args.get('location', default=None, type=str),
-        'category': request.args.get('category', None, type=str),
-        'limit': request.args.get('limit', 10, type=int)
-    }
-    results = search(search_params)
-    all_businesses = results.items
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 10, type=int)
+
+    businesses = Business.query.paginate(
+        page=page, per_page=per_page, error_out=False)
+
+    businesses_data = [{
+        "id": business.id, "user_id": business.user.id, "name": business.name,
+        "location": business.location, "category": business.category,
+        "description": business.description, "created_at": business.created_at,
+        "updated_at": business.updated_at
+    } for business in businesses.items]
+
+    next_page = url_for(
+        'business.get_all_businesses', page=results.next_num) \
+        if businesses.has_next else None
+
+    prev_page = url_for(
+        'business.get_all_businesses', page=results.prev_num) \
+        if businesses.has_prev else None
+
     return jsonify({
-        "page": results.page,
-        "total_results": results.total,
-        "total_pages": results.pages,
-        "per_page": results.per_page,
-        "objects": [{
-            "id": business.id, "user_id": business.user.id,
-            "name": business.name, "location": business.location,
-            "category": business.category, "description": business.description,
-            "created_at": business.created_at,
-            "updated_at": business.updated_at,
-        } for business in all_businesses]
-        })
+        "results": businesses_data,
+        "per_page": businesses.per_page,
+        "page": businesses.page,
+        "total_pages": businesses.pages,
+        "total_results": businesses.total,
+        "next_page": next_page,
+        "prev_page": prev_page
+    })
 
 
 @business.route('/businesses/search', methods=['GET'], strict_slashes=False)
@@ -107,7 +133,7 @@ def search_businesses():
     search_params = {
         'page': request.args.get('page', 1, type=int),
         'name': request.args.get('q', None, type=str),
-        'location': request.args.get('location', default=None, type=str),
+        'location': request.args.get('location', None, type=str),
         'category': request.args.get('category', None, type=str),
         'limit': request.args.get('limit', 10, type=int),
     }
@@ -156,14 +182,15 @@ def update_business(current_user, businessId):
             "message": "Business updated",
             "Details": {
                 "name": business.name, "location": business.location,
-                "category": business.category}}), 200
+                "category": business.category,
+                "description": business.description}}), 200
     return jsonify({"message": "only business owner can update"}), 403
 
 
 @business.route(
     '/businesses/<businessId>', methods=['DELETE'], strict_slashes=False)
 @login_required
-def delete_business(businessId):
+def delete_business(current_user, businessId):
     """delete business in the database"""
     business = Business.query.filter_by(id=businessId).first()
     if not business:
