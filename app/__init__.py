@@ -4,9 +4,8 @@
 from flask import Flask, Blueprint, make_response, render_template, jsonify
 import os
 from instance.config import app_config
-from flask_migrate import Migrate
 from flask_cors import CORS
-from .extensions import db, mail, bcrypt, make_celery
+from .extensions import db, mail, bcrypt, make_celery, migrate
 from app.api.v2.business import business
 from app.api.v2.review import review
 from app.api.v2.user import auth
@@ -31,7 +30,7 @@ def create_app(config_name):
         "result_backend": "redis://localhost:6379/0"
      }
 
-    migrate = Migrate(app, db)
+    migrate.init_app(app, db)
     db.init_app(app)
     mail.init_app(app)
     bcrypt.init_app(app)
