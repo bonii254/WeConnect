@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """manage user authorization and authentications"""
 
 
@@ -8,10 +8,10 @@ import os
 import random
 import string
 
-from flask import Blueprint, jsonify, url_for, render_template, request
-from flask_mail import Message
+from flask import Blueprint, jsonify, request
 from utils.json_schema import (reg_user_schema, login_schema, reset_pass,
                                update_user_schema, login_required, forgot_pass)
+from app.services.mail import send_password_reset_email
 from app.models.v2 import User
 from app.extensions import db, mail, bcrypt
 from cerberus import Validator
@@ -60,8 +60,10 @@ def login():
             payload = {
                 "username": user.username, "email": user.email,
                 "first_name": user.first_name, "last_name": user.last_name,
-                "image": user.image, 
-                "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=60)}
+                "image": user.image,
+                "exp":
+                    datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
+                }
             token = jwt.encode(
                 payload, os.getenv("SECRET_KEY"), algorithm='HS256')
             user.logged_in = True
@@ -95,9 +97,10 @@ def reset_password(current_user):
     errors = validator.errors
     if errors:
         return jsonify({"Errors": errors}), 401
-    if bcrypt.check_hashed_password(current_user.password, data['old_password']):
+    if bcrypt.check_hashed_password(
+            current_user.password, data['old_password']):
         hashed_password = bcrypt.generate_hashed_password(
-            data['password'], method='sha256')
+            data['password']).decode('utf-8')
         current_user.password = hashed_password
         db.session.commit()
         return jsonify({"message": "password updated"}), 201
@@ -145,23 +148,19 @@ def forgot_password():
     if user:
         characters = string.ascii_letters + string.digits + string.punctuation
         password = ''.join(random.choice(characters) for _ in range(8))
-        user.password = bcrypt.generate_password_hash(password, method='sha256')
+        user.password = bcrypt.generate_password_hash(password).decode('utf-8')
         db.session.commit()
-        msg = Message(
-            subject="Password Reset Request",
-            sender="bonnyrangi95@gmail.com",
-            recipients=[user.email])
-        login_link = url_for('auth.login', _external=True)
-        msg.html = render_template(
-            '/mails/forgot_password.html',
-            username=user.username, password=password,
-            email=user.email, login_link=login_link)
-        try:
-            mail.send(msg)
-            return jsonify(
-                {"Success": "Password reset initiated."
-                 "Check your email for further instructions."})
-        except Exception as e:
-            return jsonify({"Error": f"Failed to send email: {str(e)}"}), 500
+        data = {
+            "user_id": user.id,
+            "password": password,
+            "email": user.email
+        }
+
+        send_password_reset_email.delay(data)
+        return jsonify({
+            "message": "check your email and log in with the new password"
+            }), 201
     else:
-        return jsonify({"Error": "User not found"}), 404
+        return jsonify({
+            "Error": "email not found! input email associated with the account"
+            }), 404
