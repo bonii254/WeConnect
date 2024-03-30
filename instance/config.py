@@ -10,28 +10,28 @@ class Config(object):
     TESTING = False
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAIL_SERVER='smtp.gmail.com'
-    MAIL_PORT=465
-    MAIL_USE_SSL=True
+    MAIL_SERVER = 'smtp.gmail.com'
+    MAIL_PORT = 465
+    MAIL_USE_SSL = True
     MAIL_USERNAME = 'bonnyrangi95@gmail.com'
     MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 
 
 class Development(Config):
-    """development"""
+    """development server configuration"""
     DEBUG = True
 
 
 class Testing(Config):
-    """docstring for Testing"""
+    """Testing server configuration"""
     DEBUG = True
-    MAIL_SUPPRESS_SEND= False
+    MAIL_SUPPRESS_SEND = False
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL')
 
 
 class Production(Config):
-    """dfdfd"""
+    """production srver configuration"""
     DEBUG = False
 
 
