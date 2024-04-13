@@ -28,7 +28,7 @@ def create_user():
     validator.validate(user_info)
     errors = validator.errors
     if errors:
-        return jsonify({"Errors": errors}), 401
+        return jsonify({"Errors": errors}), 400
     user_info['username'] = user_info['username'].strip().lower()
     user_info['password'] = bcrypt.generate_password_hash(
         user_info['password']).decode('utf-8')
@@ -51,7 +51,7 @@ def login():
         validator.validate(login_info)
         errors = validator.errors
         if errors:
-            return jsonify({"Errors": errors}), 401
+            return jsonify({"Errors": errors}), 400
         username = login_info['username'].strip().lower()
         user = User.query.filter_by(username=username).first()
         if not user:
@@ -70,7 +70,7 @@ def login():
             db.session.commit()
             return jsonify({
                 "message": "Login successful!",
-                "auth_token": token
+                "access-token": token
                 }), 200
         return jsonify({"message": "incorrect password"}), 401
     except Exception:
@@ -97,16 +97,16 @@ def reset_password(current_user):
     errors = validator.errors
     if errors:
         return jsonify({"Errors": errors}), 401
-    if bcrypt.check_hashed_password(
+    if bcrypt.check_password_hash(
             current_user.password, data['old_password']):
-        hashed_password = bcrypt.generate_hashed_password(
+        hashed_password = bcrypt.generate_password_hash(
             data['password']).decode('utf-8')
         current_user.password = hashed_password
         db.session.commit()
         return jsonify({"message": "password updated"}), 201
 
     error = {"old_password": "incorrect old password"}
-    return jsonify({"Errors": error}), 406
+    return jsonify({"Errors": error}), 401
 
 
 @auth.route('/auth/update-profile', methods=['PUT'], strict_slashes=False)
@@ -126,7 +126,7 @@ def update_profile(current_user):
     current_user.image = user_info['image']
     db.session.commit()
     return jsonify({
-        "SUccess": "user updated!",
+        "Success": "user updated!",
         "Details": {
             "email": current_user.email,
             "username": current_user.username,
