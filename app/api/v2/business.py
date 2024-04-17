@@ -21,7 +21,7 @@ def register_business(current_user):
     validator.validate(bus_info)
     errors = validator.errors
     if errors:
-        return jsonify({"Errors": errors})
+        return jsonify({"Errors": errors}), 400
     bus_info['name'] = bus_info['name'].strip().lower()
     bus_info['user_id'] = current_user.id
     new_bus = Business(
@@ -89,7 +89,7 @@ def get_user_businesses(current_user):
         "total_results": results.total,
         "next_page": next_page,
         "prev_page": prev_page
-    })
+    }), 200
 
 
 @business.route('/businesses', methods=['GET'], strict_slashes=False)
@@ -109,11 +109,11 @@ def get_all_businesses():
     } for business in businesses.items]
 
     next_page = url_for(
-        'business.get_all_businesses', page=results.next_num) \
+        'business.get_all_businesses', page=businesses.next_num) \
         if businesses.has_next else None
 
     prev_page = url_for(
-        'business.get_all_businesses', page=results.prev_num) \
+        'business.get_all_businesses', page=businesses.prev_num) \
         if businesses.has_prev else None
 
     return jsonify({
@@ -124,7 +124,7 @@ def get_all_businesses():
         "total_results": businesses.total,
         "next_page": next_page,
         "prev_page": prev_page
-    })
+    }), 200
 
 
 @business.route('/businesses/search', methods=['GET'], strict_slashes=False)
@@ -151,7 +151,7 @@ def search_businesses():
             "created_at": business.created_at,
             "updated_at": business.updated_at,
         } for business in all_businesses]
-        })
+        }), 200
 
 
 @business.route(
@@ -161,7 +161,7 @@ def update_business(current_user, businessId):
     """updates business info"""
     business = Business.query.filter_by(id=businessId).first()
     if not business:
-        return jsonify({"message": "business not found"}), 401
+        return jsonify({"message": "business not found"}), 404
     bus_info = request.get_json()
     validator = Validator(business_update)
     validator.validate(bus_info)
@@ -194,9 +194,9 @@ def delete_business(current_user, businessId):
     """delete business in the database"""
     business = Business.query.filter_by(id=businessId).first()
     if not business:
-        return jsonify({"message": "business not found"}), 401
+        return jsonify({"message": "business not found"}), 404
     if business.user.id == current_user.id:
         db.session.delete(business)
         db.session.commit()
         return jsonify({"message": "business deleted"}), 201
-    return jsonify({"message": "only business owner can delete"})
+    return jsonify({"message": "only business owner can delete"}), 403
