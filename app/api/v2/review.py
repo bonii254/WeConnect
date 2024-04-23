@@ -23,6 +23,9 @@ def create_review(current_user, businessId):
     if business.user == current_user:
         return jsonify({"Error": "you cannot review your own business"}), 401
     review_info = request.get_json()
+    if len(review_info["review"]) > 255:
+         return jsonify({
+             "message": "Review content exceeds the maximum length"}), 401
     validator = Validator(review_schema)
     validator.validate(review_info)
     errors = validator.errors
@@ -59,7 +62,7 @@ def get_business_reviews(businessId):
             page=page, per_page=per_page, error_out=False)
     reviews = my_reviews.items
     if not reviews:
-        return jsonify({"message": "No Reviews for this business"})
+        return jsonify({"message": "No Reviews for this business"}), 404
     return jsonify({
         "message": f"reviews for {business.name}",
         "Details": [
@@ -80,7 +83,7 @@ def update_business_reviews(current_user, reviewId):
     """edit business review"""
     review = Review.query.filter_by(id=reviewId).first()
     if not review:
-        return jsonify({"message": "review not found"})
+        return jsonify({"message": "review not found"}), 404
     review_info = request.get_json()
     validator = Validator(review_schema)
     validator.validate(review_info)
@@ -98,7 +101,7 @@ def update_business_reviews(current_user, reviewId):
                 "review": review.review, "user_id": review.user_id,
                 "business_id": review.business_id
             }}), 200
-    return jsonify({"Error": "you can only update your review"})
+    return jsonify({"Error": "you can only update your review"}), 403
 
 
 @review.route(
