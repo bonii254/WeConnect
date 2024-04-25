@@ -1,5 +1,5 @@
-
 # WECONNECT
+[![Coverage Status](https://badge.coveralls.io/repos/github/bonii254/WeConnect/badge.svg?branch=master)](https://badge.coveralls.io/github/bonii254/WeConnect?branch=master)
 
 WeConnect provides a platform that brings businesses and individuals together CreatING awareness for businesses and gives the users the ability to write reviews about the businesses they have interacted with.
 
@@ -86,7 +86,7 @@ Once you have Python and pip installed, follow these steps to set up the project
     - Once the server is running, you can access the API endpoints using tools like cURL, Postman, or by making HTTP requests from your frontend application.
 ```bash
 curl -X POST \
-  http://localhost:5000/api/register \
+  http://localhost:5000/api/v2/auth/register \
   -H 'Content-Type: application/json' \
   -d '{
     "username": "bonface",
