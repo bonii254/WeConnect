@@ -1,0 +1,14 @@
+language: python
+python:
+  - "3.10.12"
+install:
+  - pip install -r requirements.txt
+  #- pip3 install coveralls
+services:
+  - mysql
+  - redis-server
+before_script:
+  - mysql -e 'CREATE DATABASE weconnect_test;'
+  - flask db upgrade
+script:
+  - coverage run -m pytest tests
