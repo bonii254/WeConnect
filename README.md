@@ -96,6 +96,10 @@ curl -X POST \
     "last_name": "murangiri"
   }'
 ```
+8. **Test the Application:**
+```bash
+coverage run -m pytest tests
+```
 
 
 
