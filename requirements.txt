@@ -9,6 +9,7 @@ fabric==2.6.0
 Fabric3==1.14.post1
 Flask==3.0.0
 Flask-Cors==4.0.0
+flask_sqlalchemy
 greenlet==3.0.3
 httplib2==0.20.2
 importlib-metadata==4.6.4
