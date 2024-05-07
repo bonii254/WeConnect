@@ -1,4 +1,4 @@
-ppdirs==1.4.4
+appdirs==1.4.4
 bcrypt==3.1.7
 blinker==1.7.0
 cffi==1.16.0
