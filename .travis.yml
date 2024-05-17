@@ -8,7 +8,7 @@ services:
   - mysql
   - redis-server
 before_script:
-  - mysql < mysql_setup.sql
+  - mysql -e 'CREATE DATABASE weconnect_test;'
   - flask db upgrade
 script:
   - coverage run -m pytest tests
