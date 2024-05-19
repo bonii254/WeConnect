@@ -1,14 +1,32 @@
-language: python
+nguage: python
 python:
-  - "3.8"
+  - "3.10"  # specify the Python version you want to use
+
+services:
+  - mysql  # for MySQL database
+
+before_install:
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS weconnect_test_db;'
+  - mysql -e "GRANT ALL ON weconnect_test_db.* TO 'weconnect_test'@'localhost' IDENTIFIED BY 'weconnect_pwd';"
+
 install:
   - pip install -r requirements.txt
-  #- pip3 install coveralls
-services:
-  - mysql
-  - redis-server
+  #- pip install coveralls  # if you want to use coveralls for code coverage
+
 before_script:
-  - mysql -e 'CREATE DATABASE weconnect_test;'
-  - flask db upgrade
+  - python setup_mysql_test.py  # script to setup MySQL test database
+
 script:
   - coverage run -m pytest tests
+
+#after_success:
+  #- coveralls  # report coverage to coveralls.io
+
+branches:
+  only:
+    - master
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
