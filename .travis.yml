@@ -8,7 +8,7 @@ services:
 
 before_install:
   - mysql -e 'CREATE DATABASE IF NOT EXISTS weconnect_test_db;'
-  - mysql -e "GRANT ALL ON weconnect_test_db.* TO 'weconnect_test'@'localhost' IDENTIFIED BY 'weconnect_pwd';"
+  - mysql -e "GRANT ALL PRIVILEGES ON weconnect_test_db.* TO 'weconnect_test'@'localhost' IDENTIFIED BY 'weconnect_pwd';"
 
 install:
   - pip install -r requirements.txt
