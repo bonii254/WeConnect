@@ -1,6 +1,6 @@
 nguage: python
 python:
-  - "3.10"  # specify the Python version you want to use
+  - "3.10.12"  # specify the Python version you want to use
 
 services:
   - mysql  # for MySQL database
